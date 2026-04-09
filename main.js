@@ -4,24 +4,20 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 600;
 
-// ==========================================
 // CONSTANTES DE FÍSICA Y NAVE
-// ==========================================
 const FPS = 60;
-const FRICTION = 0.7; // Fricción en el espacio (0 = sin fricción, 1 = mucha fricción)
-const SHIP_SIZE = 30; // Altura de la nave en píxeles
-const SHIP_THRUST = 5; // Aceleración en píxeles por segundo
-const TURN_SPEED = 360; // Velocidad de giro en grados por segundo
+const FRICTION = 0.7; 
+const SHIP_SIZE = 30;
+const SHIP_THRUST = 5; 
+const TURN_SPEED = 360; 
 
-// ==========================================
 // ESTADO DE LA NAVE
-// ==========================================
 const ship = {
     x: canvas.width / 2,
     y: canvas.height / 2,
     r: SHIP_SIZE / 2,
-    a: 90 / 180 * Math.PI, // Ángulo en radianes (90 grados para apuntar hacia arriba)
-    rot: 0, // Dirección de rotación (-1 izquierda, 1 derecha)
+    a: 90 / 180 * Math.PI, 
+    rot: 0, 
     thrusting: false,
     thrust: {
         x: 0,
@@ -29,9 +25,7 @@ const ship = {
     }
 };
 
-// ==========================================
 // CONTROLES (Event Listeners)
-// ==========================================
 document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
 
@@ -51,9 +45,7 @@ function keyUp(/** @type {KeyboardEvent} */ ev) {
     }
 }
 
-// ==========================================
 // EL GAME LOOP
-// ==========================================
 function gameLoop() {
     update();
     draw();
@@ -77,9 +69,8 @@ function update() {
     ship.x += ship.thrust.x;
     ship.y += ship.thrust.y;
 
-    // ==========================================
     // 4. LÍMITES DE LA PANTALLA (NUEVO)
-    // ==========================================
+
     // Eje X (Izquierda / Derecha)
     if (ship.x < 0 - ship.r) {
         ship.x = canvas.width + ship.r;
