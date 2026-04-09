@@ -64,12 +64,11 @@ function update() {
     // 1. Rotar la nave
     ship.a += ship.rot;
 
-    // 2. Calcular el empuje (Física vectorial)
+    // 2. Calcular el empuje
     if (ship.thrusting) {
         ship.thrust.x += SHIP_THRUST * Math.cos(ship.a) / FPS;
         ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a) / FPS;
     } else {
-        // Aplicar fricción para que frene poco a poco
         ship.thrust.x -= FRICTION * ship.thrust.x / FPS;
         ship.thrust.y -= FRICTION * ship.thrust.y / FPS;
     }
@@ -77,6 +76,23 @@ function update() {
     // 3. Mover la nave
     ship.x += ship.thrust.x;
     ship.y += ship.thrust.y;
+
+    // ==========================================
+    // 4. LÍMITES DE LA PANTALLA (NUEVO)
+    // ==========================================
+    // Eje X (Izquierda / Derecha)
+    if (ship.x < 0 - ship.r) {
+        ship.x = canvas.width + ship.r;
+    } else if (ship.x > canvas.width + ship.r) {
+        ship.x = 0 - ship.r;
+    }
+
+    // Eje Y (Arriba / Abajo)
+    if (ship.y < 0 - ship.r) {
+        ship.y = canvas.height + ship.r;
+    } else if (ship.y > canvas.height + ship.r) {
+        ship.y = 0 - ship.r;
+    }
 }
 
 function draw() {
