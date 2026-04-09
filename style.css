@@ -1,0 +1,16 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #111; /* Fondo gris muy oscuro para la web */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ocupar toda la altura de la ventana */
+    overflow: hidden; /* Evitar barras de scroll */
+}
+
+canvas {
+    background-color: #000; /* Fondo negro absoluto para el espacio */
+    border: 2px solid #fff; /* Un borde blanco retro */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); /* Un ligero brillo */
+}
