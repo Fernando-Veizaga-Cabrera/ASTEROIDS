@@ -1,54 +1,15 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Asteroids</title>
-        <style>
-            body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-            canvas { border: 1px solid white; background: black; }
-        </style>
+        <title>ASTEROIDS</title>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <canvas id="game"></canvas>
-    <script>
-        const canvas = document.getElementById("game");
-        const ctx = canvas.getContext("2d");
-        canvas.width = 800;
-        canvas.height = 600;
-
-        let x = 400, y = 300, a = 0, vx = 0, vy = 0;
-        let keys = {};
-
-        window.onkeydown = (e) => keys[e.key] = true;
-        window.onkeyup = (e) => keys[e.key] = false;
-
-        function loop() {
-            if (keys["ArrowLeft"])  a -= 0.08;
-            if (keys["ArrowRight"]) a += 0.08;
-            if (keys["ArrowUp"]) {
-                vx += Math.cos(a) * 0.2;
-                vy += Math.sin(a) * 0.2;
-            }
-            x += vx; y += vy;
-            vx *= 0.97; vy *= 0.97;
-            if (x > canvas.width) x = 0; if (x < 0) x = canvas.width;
-            if (y > canvas.height) y = 0; if (y < 0) y = canvas.height;
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(a);
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(15, 0);
-            ctx.lineTo(-10, 10);
-            ctx.lineTo(-10, -10);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.restore();
-            requestAnimationFrame(loop);
-        }
-        loop();
-    </script>
+        <h1>ASTEROIDS</h1>
+        <svg id="mundo" width="800" height="600">
+            <polygon id="nave" points="0,-15 10,15 -10,15" stroke="white" fill="none" stroke-width="2"/>
+            <circle id="asteroide" cx="100" cy="100" r="30" stroke="white" fill="none" stroke-width="2"/>
+        </svg>
+        <script src="script.js"></script>
     </body>
 </html>
