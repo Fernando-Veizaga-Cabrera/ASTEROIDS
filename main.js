@@ -101,13 +101,11 @@ function destroyAsteroid(index) {
     const y = asteroids[index].y;
     const r = asteroids[index].r;
 
-    // Si el asteroide es lo suficientemente grande, dividirlo en 2 mitades
     if (r > Math.ceil(ROIDS_SIZE / 4)) {
         asteroids.push(newAsteroid(x, y, Math.ceil(r / 2)));
         asteroids.push(newAsteroid(x, y, Math.ceil(r / 2)));
     }
 
-    // Eliminar el asteroide original del arreglo
     asteroids.splice(index, 1);
 }
 
@@ -168,9 +166,6 @@ function update() {
         handleScreenWrap(asteroids[i]);
     }
 
-    // ==========================================
-    // DETECCIÓN DE COLISIONES (Láser vs Asteroide)
-    // ==========================================
     for (let i = asteroids.length - 1; i >= 0; i--) {
         const roid = asteroids[i];
         
@@ -178,11 +173,8 @@ function update() {
             const laser = ship.lasers[j];
             
             if (distBetweenPoints(roid.x, roid.y, laser.x, laser.y) < roid.r) {
-                // Eliminar el láser
                 ship.lasers.splice(j, 1);
-                // Destruir / Dividir el asteroide
                 destroyAsteroid(i);
-                // Romper el ciclo secundario (el láser ya no existe para chocar con otros)
                 break; 
             }
         }
@@ -243,9 +235,9 @@ function drawShip() {
 
 function drawLasers() {
     for (let i = 0; i < ship.lasers.length; i++) {
-        ctx.fillStyle = 'salmon';
+        ctx.fillStyle = 'white';
         ctx.beginPath();
-        ctx.arc(ship.lasers[i].x, ship.lasers[i].y, SHIP_SIZE / 15, 0, Math.PI * 2, false);
+        ctx.arc(ship.lasers[i].x, ship.lasers[i].y, SHIP_SIZE / 6, 0, Math.PI * 2, false);
         ctx.fill();
     }
 }
