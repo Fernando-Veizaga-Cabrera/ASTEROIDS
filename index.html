@@ -6,16 +6,29 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
+        <div class="menu">
+            <div class="menu_container">
+                <h1 class="menu_title">
+                    Asteroids
+                </h1>
+                <button class="menu_button">
+                    Star Game
+                </button>
+                <p class="menu_text">
+                    Instrucciones : Usa las flechas para moverte y espacio para disparar
+                </p>
+            </div>
+        </div>
         <div class="header">
-            <h1 class="header_title">
-                ASTEROIDS
-            </h1>
+            <h2 class="header_title">
+                Asteroids
+            </h2>
             <p class="header_score">
-                PUNTUACION : <span class="header_rate"> 0 </span>
+                puntuacion : <span class="header_rate"> 0 </span>
             </p>
         </div>
         <svg class="world" width="1200" height="600">
-            <g class="meteorite">
+            <g class="meteorite meteorite_hidden">
                 <circle cx="100" cy="100" r="45">
                 </circle> 
                 <polygon points="100,60 140,80 130,130 90,140 60,110 70,70">
