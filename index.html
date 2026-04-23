@@ -1,48 +1,17 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>ASTEROIDS</title>
-        <link rel="stylesheet" href="style.css">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div class="menu">
-            <div class="menu_container">
-                <h1 class="menu_title">
-                    Asteroids
-                </h1>
-                <button class="menu_button">
-                    Star Game
-                </button>
-                <p class="menu_text">
-                    Instrucciones : Usa las flechas para moverte y espacio para disparar
-                </p>
-            </div>
-        </div>
-        <div class="header">
-            <h2 class="header_title">
-                Asteroids
-            </h2>
-            <p class="header_score">
-                puntuacion : <span class="header_rate"> 0 </span>
-            </p>
-        </div>
-        <svg class="world" width="1200" height="600">
-            <g class="meteorite meteorite_hidden">
-                <circle cx="100" cy="100" r="45">
-                </circle> 
-                <polygon points="100,60 140,80 130,130 90,140 60,110 70,70">
-                </polygon>
-            </g>
-            <g class="spaceship">
-                <polygon points="600,300 610,330 590,330">
-                </polygon>
-            </g>
-            <g class="bullet">
-                <circle class="bullet_hidden" cx="0" cy="0" r="2">
-                </circle>
-            </g>
-        </svg>
-        <script src="script.js"></script>
-    </body>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroids Clone</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-header">ASTEROIDS</h1>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    
+    <script src="main.js"></script>
+</body>
 </html>

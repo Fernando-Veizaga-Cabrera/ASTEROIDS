@@ -1,125 +1,32 @@
-:root {
-    --main_color: #002244;
-    --background: #222222;
-    --backdrop: #DDDDDD;
-    --blood: #660000;
-}
-
 body {
-    margin: 0rem;
-    height: 100vh;
-    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    background-color: #111; /* Fondo gris muy oscuro para la web */
+    color: white; /* Color del texto base */
+    font-family: 'Courier New', Courier, monospace; /* Tipografía retro */
     display: flex;
-    align-items: center;
-    flex-direction: column;
-    justify-content: space-evenly;
-    font-family: 'Courier New';    
-    color: var(--backdrop);
-    background-color: var(--background);
-}
-
-.menu {
-    z-index: 2;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    position: absolute;
-    align-items: center;
     justify-content: center;
-    background-color: var(--main_color);
-}
-
-.menu_container {
-    text-align: center;
-    color: var(--backdrop);
-}
-
-.menu_title {
-    font-size: 4rem;
-    margin-bottom: 0rem;
-    letter-spacing: 0.5rem;
-    text-transform: uppercase;
-    animation: blink 2s infinite alternate;
-}
-
-.menu_button {
-    margin: 2rem 0rem;
-    font-size: 1rem;
-    padding: 1rem 2.5rem;
-    letter-spacing: 0.5rem;
-    border: none;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    box-sizing: border-box;
-    text-transform: uppercase;
-    font-family: 'Courier New';
-    color: var(--background);
-    background-color: var(--backdrop);
-}
-
-.menu_button:hover {
-    color: var(--backdrop);
-    background-color: var(--background);
-    box-shadow: 0 0 2rem var(--backdrop);
-}
-
-.header {
-    margin: 0rem;
-    display: flex;
-    flex-direction: column;
     align-items: center;
+    height: 100vh; /* Ocupar toda la altura de la ventana */
+    overflow: hidden; /* Evitar barras de scroll */
 }
 
-.header_title {
-    margin: 0rem;
-    font-size: 4rem;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.5rem;
-    text-transform: uppercase;
-    animation: blink 2s infinite alternate;
+.game-container {
+    text-align: center; /* Centra el título y el canvas */
 }
 
-.header_score {
-    margin: 0rem;
-    text-transform: uppercase;
+.game-header {
+    font-size: 40px;
+    letter-spacing: 15px; /* Espaciado amplio entre letras para estilo Arcade */
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Brillo del texto */
 }
 
-.world {
-    border-radius: 0.5rem;
-    background-color: var(--main_color);
-    border: 0.2rem solid var(--backdrop);
-    transition: background-color 2s ease;
-}
-
-.meteorite {
-    fill: var(--background);
-    stroke: var(--backdrop);
-    stroke-width: 0.1rem;
-}
-
-.spaceship {
-    fill: var(--background);
-    stroke: var(--backdrop);
-    stroke-width: 0.1rem;
-}
-
-.bullet_hidden {
-    fill: var(--backdrop);
-    display: none;
-}
-
-.meteorite_hidden {
-    display: none;
-}
-
-@keyframes blink {
-    0%, 10%, 20%, 35%, 60%, 100% {
-        text-shadow: 
-            0 0 0.1rem var(--main_color),
-            0 0 1rem var(--backdrop),
-            0 0 1.5rem var(--backdrop);
-    }
-    15%, 25%, 45% {       
-        text-shadow: none;
-    }
+canvas {
+    background-color: #000; /* Fondo negro absoluto para el espacio */
+    border: 2px solid #fff; /* Un borde blanco retro */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); /* Un ligero brillo exterior */
+    display: block;
+    margin: 0 auto; /* Asegura el centrado dentro del contenedor */
 }
