@@ -10,7 +10,7 @@ const FRICTION = 0.7;
 const SHIP_SIZE = 30;
 const SHIP_THRUST = 5;
 const TURN_SPEED = 360;
-const SHIP_EXPLODE_DUR = 0.5;
+const SHIP_EXPLODE_DUR = 0.8; // Aumentado un poco para que las partículas floten más tiempo
 const SHIP_INV_DUR = 3; 
 const SHIP_BLINK_DUR = 0.1; 
 const LASER_MAX = 10;
@@ -25,14 +25,9 @@ const PTS_LGE = 20;
 const PTS_MED = 50; 
 const PTS_SML = 100;
 
-// CARGA DE ASSETS
-const explodeImg = new Image();
-explodeImg.src = "assets/explosion.png";
-const EXPLOSION_FRAMES = 6; 
-
 // VARIABLES DE ESTADO
 let asteroids, lives, score, level, ship, gameOver;
-let showMenu = true; // <-- NUEVO ESTADO: Iniciamos en el menú
+let showMenu = true; 
 
 // INICIO DEL JUEGO
 function newGame() {
@@ -57,7 +52,8 @@ function newShip() {
         blinkTime: 0,
         blinkOn: true,
         invTime: Math.ceil(SHIP_INV_DUR * FPS),
-        lasers: []
+        lasers: [],
+        particles: [] // NUEVO: Arreglo para guardar los fragmentos de la explosión
     };
 }
 
@@ -66,15 +62,10 @@ document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
 
 function keyDown(ev) {
-    // Si estamos en el menú, cualquier presión de la barra espaciadora inicia el juego
     if (showMenu) {
-        if (ev.key === " ") {
-            showMenu = false;
-            newGame();
-        }
+        if (ev.key === " ") { showMenu = false; newGame(); }
         return;
     }
-
     if (gameOver) {
         if (ev.key === "Enter") newGame();
         return;
@@ -106,7 +97,6 @@ function createAsteroidBelt() {
         do {
             x = Math.floor(Math.random() * canvas.width);
             y = Math.floor(Math.random() * canvas.height);
-            // El chequeo "ship &&" evita errores en el menú cuando la nave aún no existe
         } while (ship && distBetweenPoints(ship.x, ship.y, x, y) < ROIDS_SIZE * 2 + ship.r);
         asteroids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 2)));
     }
@@ -132,10 +122,7 @@ function destroyAsteroid(index) {
         asteroids.push(newAsteroid(x, y, Math.ceil(r / 2)));
     }
     asteroids.splice(index, 1);
-    if (asteroids.length === 0) {
-        level++;
-        createAsteroidBelt();
-    }
+    if (asteroids.length === 0) { level++; createAsteroidBelt(); }
 }
 
 // UTILIDADES
@@ -164,19 +151,16 @@ function shootLaser() {
 
 // MOTOR DE ACTUALIZACIÓN
 function update() {
-    // 1. LÓGICA DEL MENÚ: Solo mover asteroides
     if (showMenu) {
         for (let a of asteroids) { a.x += a.xv; a.y += a.yv; handleScreenWrap(a); }
-        return; // Salimos de la función aquí, la nave no existe aún
+        return; 
     }
 
-    // 2. LÓGICA DEL GAME OVER
     if (gameOver) return;
 
-    // 3. LÓGICA DEL JUEGO NORMAL
     const exploding = ship.explodeTime > 0;
 
-    // Nave
+    // Nave y Sistema de Partículas
     if (!exploding) {
         if (ship.invTime > 0) {
             ship.invTime--;
@@ -199,6 +183,13 @@ function update() {
         handleScreenWrap(ship);
     } else {
         ship.explodeTime--;
+        
+        // Desplazar los fragmentos de la explosión
+        for (let p of ship.particles) {
+            p.x += p.xv;
+            p.y += p.yv;
+        }
+
         if (ship.explodeTime === 0) {
             lives--;
             if (lives === 0) gameOver = true;
@@ -223,6 +214,18 @@ function update() {
         for (let i = 0; i < asteroids.length; i++) {
             if (distBetweenPoints(ship.x, ship.y, asteroids[i].x, asteroids[i].y) < ship.r + asteroids[i].r) {
                 ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
+                
+                // Generar 30 partículas apuntando en direcciones aleatorias
+                for(let k = 0; k < 30; k++) {
+                    ship.particles.push({
+                        x: ship.x, 
+                        y: ship.y,
+                        xv: (Math.random() - 0.5) * (Math.random() * 8), // Velocidad X
+                        yv: (Math.random() - 0.5) * (Math.random() * 8), // Velocidad Y
+                        r: Math.random() * 3 // Tamaño de la partícula
+                    });
+                }
+                
                 destroyAsteroid(i);
                 break;
             }
@@ -248,7 +251,6 @@ function draw() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Asteroides (Se dibujan en todos los estados)
     ctx.strokeStyle = "slategray"; ctx.lineWidth = 1.5;
     for (let a of asteroids) {
         ctx.beginPath();
@@ -257,34 +259,23 @@ function draw() {
         ctx.closePath(); ctx.stroke();
     }
 
-    // PANTALLA DE MENÚ
     if (showMenu) {
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.font = "80px Courier";
-        ctx.fillText("ASTEROIDS", canvas.width / 2, canvas.height / 2 - 20);
-        ctx.font = "20px Courier";
-        ctx.fillText("PRESS SPACE TO PLAY", canvas.width / 2, canvas.height / 2 + 40);
-        return; // Detenemos el dibujado aquí para no dibujar la UI del juego
+        ctx.fillStyle = "white"; ctx.textAlign = "center";
+        ctx.font = "80px Courier"; ctx.fillText("ASTEROIDS", canvas.width / 2, canvas.height / 2 - 20);
+        ctx.font = "20px Courier"; ctx.fillText("PRESS SPACE TO PLAY", canvas.width / 2, canvas.height / 2 + 40);
+        return; 
     }
 
-    // Nave (Con Sprite de Explosión)
+    // Dibujar Sistema de Partículas Vectoriales
     if (ship.explodeTime > 0) {
-        if (explodeImg.complete) {
-            let totalFramesInExplosion = Math.ceil(SHIP_EXPLODE_DUR * FPS);
-            let currentFrameIndex = Math.floor((totalFramesInExplosion - ship.explodeTime) / (totalFramesInExplosion / EXPLOSION_FRAMES));
-            
-            if (currentFrameIndex >= EXPLOSION_FRAMES) currentFrameIndex = EXPLOSION_FRAMES - 1;
-            if (currentFrameIndex < 0) currentFrameIndex = 0;
-
-            let frameWidth = explodeImg.width / EXPLOSION_FRAMES;
-            let frameHeight = explodeImg.height;
-
-            ctx.drawImage(
-                explodeImg, 
-                currentFrameIndex * frameWidth, 0, frameWidth, frameHeight, 
-                ship.x - ship.r * 2, ship.y - ship.r * 2, ship.r * 4, ship.r * 4 
-            );
+        // Calcular el desvanecimiento (Alpha)
+        let alpha = ship.explodeTime / Math.ceil(SHIP_EXPLODE_DUR * FPS);
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`; 
+        
+        for (let p of ship.particles) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
         }
     } else if (ship.blinkOn && !gameOver) {
         ctx.strokeStyle = "white"; ctx.beginPath();
@@ -294,11 +285,9 @@ function draw() {
         ctx.closePath(); ctx.stroke();
     }
 
-    // Láseres
     ctx.fillStyle = "white";
     for (let l of ship.lasers) { ctx.beginPath(); ctx.arc(l.x, l.y, SHIP_SIZE / 8, 0, Math.PI * 2); ctx.fill(); }
 
-    // UI (Puntos y Vidas)
     ctx.font = "30px Courier"; ctx.textAlign = "right"; ctx.fillText(score, canvas.width - 20, 40);
     for (let i = 0; i < lives; i++) {
         let x = 30 + i * 35;
@@ -316,7 +305,6 @@ function draw() {
 
 function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
 
-// Configuración inicial al cargar la página
 level = 0;
-createAsteroidBelt(); // Creamos asteroides decorativos para el menú
-gameLoop(); // Arrancamos el motor en estado showMenu = true
+createAsteroidBelt(); 
+gameLoop();
