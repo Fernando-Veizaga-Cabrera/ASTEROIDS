@@ -4,6 +4,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 600;
 
+// Constantes físicas
 const FPS = 60;
 const FRICTION = 0.7;
 const SHIP_SIZE = 30;
@@ -16,15 +17,22 @@ const LASER_MAX = 10;
 const LASER_SPD = 500;
 const LASER_DIST = 0.5;
 
+// Constantes de Asteroides y Puntaje
 const ROIDS_NUM = 5;
 const ROIDS_SIZE = 100;
 const ROIDS_SPD = 50;
 const ROIDS_VERT = 10;
 const ROIDS_JAG = 0.4;
 const GAME_LIVES = 3;
+const ROIDS_PTS_LGE = 20;  // Puntos asteroide grande
+const ROIDS_PTS_MED = 50;  // Puntos asteroide mediano
+const ROIDS_PTS_SML = 100; // Puntos asteroide pequeño
 
+// Variables de Estado Global
 let asteroids = [];
 let lives = GAME_LIVES;
+let score = 0;
+let level = 0;
 
 const ship = {
     x: canvas.width / 2,
@@ -41,6 +49,7 @@ const ship = {
     lasers: []
 };
 
+// Listeners de teclado
 document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
 
@@ -82,7 +91,8 @@ function explodeShip() {
 function createAsteroidBelt() {
     asteroids = [];
     let x, y;
-    for (let i = 0; i < ROIDS_NUM; i++) {
+    // Agregamos asteroides extra según el nivel actual
+    for (let i = 0; i < ROIDS_NUM + level; i++) {
         do {
             x = Math.floor(Math.random() * canvas.width);
             y = Math.floor(Math.random() * canvas.height);
@@ -110,7 +120,9 @@ function newAsteroid(x, y, r) {
 
 function destroyAsteroid(index) {
     const { x, y, r } = asteroids[index];
-    if (r > Math.ceil(ROIDS_SIZE / 4)) {
+    
+    // Si el asteroide no es el tamaño más pequeño (ROIDS_SIZE / 8), divídelo en dos
+    if (r > Math.ceil(ROIDS_SIZE / 8)) {
         asteroids.push(newAsteroid(x, y, Math.ceil(r / 2)));
         asteroids.push(newAsteroid(x, y, Math.ceil(r / 2)));
     }
@@ -131,6 +143,7 @@ function handleScreenWrap(entity) {
 
 function update() {
     const exploding = ship.explodeTime > 0;
+    
     if (!exploding) {
         if (ship.invTime > 0) {
             ship.invTime--;
@@ -158,9 +171,7 @@ function update() {
         ship.explodeTime--;
         if (ship.explodeTime === 0) {
             lives--;
-            if (lives > 0) {
-                resetShip();
-            }
+            if (lives > 0) resetShip();
         }
     }
 
@@ -198,10 +209,22 @@ function update() {
             const laser = ship.lasers[j];
             if (distBetweenPoints(roid.x, roid.y, laser.x, laser.y) < roid.r) {
                 ship.lasers.splice(j, 1);
+                
+                // Otorgar puntos antes de destruir
+                if (roid.r >= Math.ceil(ROIDS_SIZE / 2)) score += ROIDS_PTS_LGE;
+                else if (roid.r >= Math.ceil(ROIDS_SIZE / 4)) score += ROIDS_PTS_MED;
+                else score += ROIDS_PTS_SML;
+
                 destroyAsteroid(i);
                 break; 
             }
         }
+    }
+
+    // Comprobar si se limpió el nivel
+    if (asteroids.length === 0) {
+        level++;
+        createAsteroidBelt();
     }
 }
 
@@ -221,8 +244,19 @@ function draw() {
     drawLasers();
     drawAsteroids();
     drawLives();
+    drawScore();
 }
 
+function drawScore() {
+    ctx.fillStyle = "white";
+    // Usamos una tipografía monospace nativa para darle ese look de consola antigua
+    ctx.font = "40px 'Courier New', monospace";
+    ctx.textAlign = "right";
+    // Escribimos la variable score en la esquina superior derecha
+    ctx.fillText(score, canvas.width - 20, 50);
+}
+
+// ... (Las funciones drawShip, drawLasers, drawAsteroids, drawLives se mantienen exactamente igual) ...
 function drawShip() {
     if (ship.explodeTime > 0) {
         ctx.fillStyle = 'darkred';
@@ -320,5 +354,7 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+// Inicialización de inicio de juego
+resetShip(); // Llamamos a resetShip en vez de inicializar en duro para tener la invulnerabilidad desde el min 1
 createAsteroidBelt();
 gameLoop();
