@@ -204,7 +204,9 @@ class GameView {
 
         this.drawShip(model.ship, model.gameOver);
         this.drawLasers(model.ship.lasers);
-        this.drawUI(model.score, model.lives, model.gameOver);
+        
+        // Fíjate que ahora también le pasamos model.level a la interfaz
+        this.drawUI(model.score, model.lives, model.level, model.gameOver); 
     }
 
     drawAsteroids(asteroids) {
@@ -244,13 +246,26 @@ class GameView {
         for (let l of lasers) { this.ctx.beginPath(); this.ctx.arc(l.x, l.y, CONFIG.SHIP_SIZE / 8, 0, Math.PI * 2); this.ctx.fill(); }
     }
 
-    drawUI(score, lives, gameOver) {
-        this.ctx.font = "30px Courier"; this.ctx.textAlign = "right"; this.ctx.fillText(score, this.canvas.width - 20, 40);
+   // Actualizamos los parámetros que recibe la función
+    drawUI(score, lives, level, gameOver) {
+        // 1. Dibujar el Puntaje (Arriba a la derecha)
+        this.ctx.font = "30px Courier"; 
+        this.ctx.textAlign = "right"; 
+        this.ctx.fillText(score, this.canvas.width - 20, 40);
+        
+        // 2. NUEVO: Dibujar el Nivel (Abajo a la izquierda)
+        this.ctx.textAlign = "left"; 
+        // Le sumamos 1 al nivel visualmente para que el jugador empiece en "LEVEL: 1" y no en "0"
+        this.ctx.fillText("LEVEL: " + (level + 1), 20, this.canvas.height - 20);
+
+        // 3. Dibujar las Vidas
         for (let i = 0; i < lives; i++) {
             let x = 30 + i * 35;
             this.ctx.strokeStyle = "white"; this.ctx.beginPath();
             this.ctx.moveTo(x, 30); this.ctx.lineTo(x-10, 50); this.ctx.lineTo(x+10, 50); this.ctx.closePath(); this.ctx.stroke();
         }
+
+        // 4. Dibujar Game Over
         if (gameOver) {
             this.ctx.textAlign = "center"; this.ctx.font = "60px Courier";
             this.ctx.fillText("GAME OVER", this.canvas.width / 2, this.canvas.height / 2);
