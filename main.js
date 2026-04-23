@@ -10,7 +10,7 @@ const FRICTION = 0.7;
 const SHIP_SIZE = 30;
 const SHIP_THRUST = 5;
 const TURN_SPEED = 360;
-const SHIP_EXPLODE_DUR = 0.5; // Aumenté un poco la duración para que se vea bien la animación
+const SHIP_EXPLODE_DUR = 0.5;
 const SHIP_INV_DUR = 3; 
 const SHIP_BLINK_DUR = 0.1; 
 const LASER_MAX = 10;
@@ -25,13 +25,14 @@ const PTS_LGE = 20;
 const PTS_MED = 50; 
 const PTS_SML = 100;
 
-// --- CARGA DE ASSETS (IMÁGENES) ---
+// CARGA DE ASSETS
 const explodeImg = new Image();
-explodeImg.src = "assets/explosion.png"; // Ruta hacia tu nueva carpeta
-const EXPLOSION_FRAMES = 6; // ATENCIÓN: Cambia este número por la cantidad exacta de fotogramas que tenga tu imagen
+explodeImg.src = "assets/explosion.png";
+const EXPLOSION_FRAMES = 6; 
 
 // VARIABLES DE ESTADO
 let asteroids, lives, score, level, ship, gameOver;
+let showMenu = true; // <-- NUEVO ESTADO: Iniciamos en el menú
 
 // INICIO DEL JUEGO
 function newGame() {
@@ -65,11 +66,20 @@ document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
 
 function keyDown(ev) {
+    // Si estamos en el menú, cualquier presión de la barra espaciadora inicia el juego
+    if (showMenu) {
+        if (ev.key === " ") {
+            showMenu = false;
+            newGame();
+        }
+        return;
+    }
+
     if (gameOver) {
         if (ev.key === "Enter") newGame();
         return;
     }
-    if (ship.explodeTime > 0) return;
+    if (ship && ship.explodeTime > 0) return;
 
     switch(ev.key) {
         case " ":          shootLaser(); break;
@@ -80,7 +90,7 @@ function keyDown(ev) {
 }
 
 function keyUp(ev) {
-    if (gameOver || ship.explodeTime > 0) return;
+    if (showMenu || gameOver || (ship && ship.explodeTime > 0)) return;
     switch(ev.key) {
         case "ArrowLeft":  if (ship.rot > 0) ship.rot = 0; break;
         case "ArrowRight": if (ship.rot < 0) ship.rot = 0; break;
@@ -96,7 +106,8 @@ function createAsteroidBelt() {
         do {
             x = Math.floor(Math.random() * canvas.width);
             y = Math.floor(Math.random() * canvas.height);
-        } while (distBetweenPoints(ship.x, ship.y, x, y) < ROIDS_SIZE * 2 + ship.r);
+            // El chequeo "ship &&" evita errores en el menú cuando la nave aún no existe
+        } while (ship && distBetweenPoints(ship.x, ship.y, x, y) < ROIDS_SIZE * 2 + ship.r);
         asteroids.push(newAsteroid(x, y, Math.ceil(ROIDS_SIZE / 2)));
     }
 }
@@ -153,8 +164,16 @@ function shootLaser() {
 
 // MOTOR DE ACTUALIZACIÓN
 function update() {
+    // 1. LÓGICA DEL MENÚ: Solo mover asteroides
+    if (showMenu) {
+        for (let a of asteroids) { a.x += a.xv; a.y += a.yv; handleScreenWrap(a); }
+        return; // Salimos de la función aquí, la nave no existe aún
+    }
+
+    // 2. LÓGICA DEL GAME OVER
     if (gameOver) return;
 
+    // 3. LÓGICA DEL JUEGO NORMAL
     const exploding = ship.explodeTime > 0;
 
     // Nave
@@ -199,7 +218,7 @@ function update() {
     // Asteroides
     for (let a of asteroids) { a.x += a.xv; a.y += a.yv; handleScreenWrap(a); }
 
-    // Colisiones
+    // Colisiones Nave
     if (!exploding && ship.invTime === 0) {
         for (let i = 0; i < asteroids.length; i++) {
             if (distBetweenPoints(ship.x, ship.y, asteroids[i].x, asteroids[i].y) < ship.r + asteroids[i].r) {
@@ -210,6 +229,7 @@ function update() {
         }
     }
 
+    // Colisiones Láser
     for (let i = asteroids.length - 1; i >= 0; i--) {
         for (let j = ship.lasers.length - 1; j >= 0; j--) {
             if (distBetweenPoints(asteroids[i].x, asteroids[i].y, ship.lasers[j].x, ship.lasers[j].y) < asteroids[i].r) {
@@ -228,7 +248,7 @@ function draw() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Asteroides
+    // Asteroides (Se dibujan en todos los estados)
     ctx.strokeStyle = "slategray"; ctx.lineWidth = 1.5;
     for (let a of asteroids) {
         ctx.beginPath();
@@ -237,9 +257,19 @@ function draw() {
         ctx.closePath(); ctx.stroke();
     }
 
+    // PANTALLA DE MENÚ
+    if (showMenu) {
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.font = "80px Courier";
+        ctx.fillText("ASTEROIDS", canvas.width / 2, canvas.height / 2 - 20);
+        ctx.font = "20px Courier";
+        ctx.fillText("PRESS SPACE TO PLAY", canvas.width / 2, canvas.height / 2 + 40);
+        return; // Detenemos el dibujado aquí para no dibujar la UI del juego
+    }
+
     // Nave (Con Sprite de Explosión)
     if (ship.explodeTime > 0) {
-        // Aseguramos que la imagen haya cargado antes de intentar dibujarla
         if (explodeImg.complete) {
             let totalFramesInExplosion = Math.ceil(SHIP_EXPLODE_DUR * FPS);
             let currentFrameIndex = Math.floor((totalFramesInExplosion - ship.explodeTime) / (totalFramesInExplosion / EXPLOSION_FRAMES));
@@ -268,7 +298,7 @@ function draw() {
     ctx.fillStyle = "white";
     for (let l of ship.lasers) { ctx.beginPath(); ctx.arc(l.x, l.y, SHIP_SIZE / 8, 0, Math.PI * 2); ctx.fill(); }
 
-    // UI
+    // UI (Puntos y Vidas)
     ctx.font = "30px Courier"; ctx.textAlign = "right"; ctx.fillText(score, canvas.width - 20, 40);
     for (let i = 0; i < lives; i++) {
         let x = 30 + i * 35;
@@ -286,5 +316,7 @@ function draw() {
 
 function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
 
-newGame();
-gameLoop();
+// Configuración inicial al cargar la página
+level = 0;
+createAsteroidBelt(); // Creamos asteroides decorativos para el menú
+gameLoop(); // Arrancamos el motor en estado showMenu = true
