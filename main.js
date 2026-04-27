@@ -3,9 +3,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 600;
 
-// ==========================================
 // CONFIGURACIÓN GLOBAL
-// ==========================================
 const CONFIG = {
     FPS: 60, FRICTION: 0.7, SHIP_SIZE: 30, SHIP_THRUST: 5, TURN_SPEED: 360,
     EXPLODE_DUR: 0.8, INV_DUR: 3, BLINK_DUR: 0.1, LASER_MAX: 10, LASER_SPD: 500, LASER_DIST: 0.5,
@@ -13,9 +11,7 @@ const CONFIG = {
     LIVES: 3, PTS_LGE: 20, PTS_MED: 50, PTS_SML: 100
 };
 
-// ==========================================
 // 1. MODELO (Manejo de Datos y Lógica/Física)
-// ==========================================
 class GameModel {
     constructor() {
         this.showMenu = true;
@@ -182,9 +178,7 @@ class GameModel {
     }
 }
 
-// ==========================================
 // 2. VISTA (Renderizado Gráfico)
-// ==========================================
 class GameView {
     constructor(ctx, canvas) {
         this.ctx = ctx;
@@ -205,7 +199,6 @@ class GameView {
         this.drawShip(model.ship, model.gameOver);
         this.drawLasers(model.ship.lasers);
         
-        // Fíjate que ahora también le pasamos model.level a la interfaz
         this.drawUI(model.score, model.lives, model.level, model.gameOver); 
     }
 
@@ -246,16 +239,12 @@ class GameView {
         for (let l of lasers) { this.ctx.beginPath(); this.ctx.arc(l.x, l.y, CONFIG.SHIP_SIZE / 8, 0, Math.PI * 2); this.ctx.fill(); }
     }
 
-   // Actualizamos los parámetros que recibe la función
     drawUI(score, lives, level, gameOver) {
-        // 1. Dibujar el Puntaje (Arriba a la derecha)
         this.ctx.font = "30px Courier"; 
         this.ctx.textAlign = "right"; 
         this.ctx.fillText(score, this.canvas.width - 20, 40);
         
-        // 2. NUEVO: Dibujar el Nivel (Abajo a la izquierda)
         this.ctx.textAlign = "left"; 
-        // Le sumamos 1 al nivel visualmente para que el jugador empiece en "LEVEL: 1" y no en "0"
         this.ctx.fillText("LEVEL: " + (level + 1), 20, this.canvas.height - 20);
 
         // 3. Dibujar las Vidas
@@ -275,9 +264,7 @@ class GameView {
     }
 }
 
-// ==========================================
 // 3. CONTROLADOR (Gestión de Inputs y Bucle)
-// ==========================================
 class GameController {
     constructor(model, view) {
         this.model = model;
@@ -328,8 +315,6 @@ class GameController {
     }
 }
 
-// ==========================================
 // ARRANQUE DE LA APLICACIÓN
-// ==========================================
 const app = new GameController(new GameModel(), new GameView(ctx, canvas));
 app.start();

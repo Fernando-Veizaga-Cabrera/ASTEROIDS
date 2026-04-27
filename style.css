@@ -1,32 +1,32 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: #111; /* Fondo gris muy oscuro para la web */
-    color: white; /* Color del texto base */
-    font-family: 'Courier New', Courier, monospace; /* Tipografía retro */
+    background-color: #111; 
+    color: white; 
+    font-family: 'Courier New', Courier, monospace; 
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Ocupar toda la altura de la ventana */
-    overflow: hidden; /* Evitar barras de scroll */
+    height: 100vh; 
+    overflow: hidden; 
 }
 
 .game-container {
-    text-align: center; /* Centra el título y el canvas */
+    text-align: center; 
 }
 
 .game-header {
     font-size: 40px;
-    letter-spacing: 15px; /* Espaciado amplio entre letras para estilo Arcade */
+    letter-spacing: 15px; 
     margin-top: 0;
     margin-bottom: 20px;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Brillo del texto */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); 
 }
 
 canvas {
-    background-color: #000; /* Fondo negro absoluto para el espacio */
-    border: 2px solid #fff; /* Un borde blanco retro */
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); /* Un ligero brillo exterior */
+    background-color: #000; 
+    border: 2px solid #fff; 
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); 
     display: block;
-    margin: 0 auto; /* Asegura el centrado dentro del contenedor */
+    margin: 0 auto; 
 }
