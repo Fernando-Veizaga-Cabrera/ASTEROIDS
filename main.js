@@ -210,7 +210,7 @@ class GameView {
         for (let a of asteroids) {
             this.ctx.beginPath();
             for (let j = 0; j < a.vert; j++) 
-                this.ctx.lineTo(a.x + a.r * a.offs[j] * Math.cos(a.a + j * Math.PI * 2 / a.vert), a.y + a.r * a.offs[j] * Math.sin(a.a + j * Math.PI * 2 / a.vert));
+                this.ctx.lineTo(a.x + a.r * a.offs[j] * Math.cos(a.a + j * 6 / a.vert), a.y + a.r * a.offs[j] * Math.sin(a.a + j * Math.PI * 2 / a.vert));
             this.ctx.closePath(); this.ctx.stroke();
         }
     }
@@ -226,7 +226,7 @@ class GameView {
             let alpha = ship.explodeTime / Math.ceil(CONFIG.EXPLODE_DUR * CONFIG.FPS);
             this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`; 
             for (let p of ship.particles) {
-                this.ctx.beginPath(); this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); this.ctx.fill();
+                this.ctx.beginPath(); this.ctx.arc(p.x, p.y, p.r, 0, 6); this.ctx.fill();
             }
         } else if (ship.blinkOn && !gameOver) {
             this.ctx.strokeStyle = "white"; this.ctx.beginPath();
@@ -239,7 +239,7 @@ class GameView {
 
     drawLasers(lasers) {
         this.ctx.fillStyle = "white";
-        for (let l of lasers) { this.ctx.beginPath(); this.ctx.arc(l.x, l.y, CONFIG.SHIP_SIZE / 8, 0, Math.PI * 2); this.ctx.fill(); }
+        for (let l of lasers) { this.ctx.beginPath(); this.ctx.arc(l.x, l.y, CONFIG.SHIP_SIZE / 8, 0, 6); this.ctx.fill(); }
     }
 
     drawUI(score, lives, level, gameOver) {
