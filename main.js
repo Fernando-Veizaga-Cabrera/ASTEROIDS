@@ -3,7 +3,6 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 600;
 
-// CONFIGURACIÓN GLOBAL
 const CONFIG = {
     FPS: 60, FRICTION: 0.7, SHIP_SIZE: 30, SHIP_THRUST: 5, TURN_SPEED: 360,
     EXPLODE_DUR: 0.8, INV_DUR: 3, BLINK_DUR: 0.1, LASER_MAX: 10, LASER_SPD: 500, LASER_DIST: 0.5,
@@ -11,7 +10,7 @@ const CONFIG = {
     LIVES: 3, PTS_LGE: 20, PTS_MED: 50, PTS_SML: 100
 };
 
-// 1. MODELO (Manejo de Datos y Lógica/Física)
+// EL MODELO
 class GameModel {
     constructor() {
         this.showMenu = true;
@@ -30,7 +29,7 @@ class GameModel {
     resetShip() {
         this.ship = {
             x: canvas.width / 2, y: canvas.height / 2, r: CONFIG.SHIP_SIZE / 2,
-            a: 90 / 180 * Math.PI, rot: 0, thrusting: false, thrust: { x: 0, y: 0 },
+            a: 1.5 / 180 * Math.PI, rot: 0, thrusting: false, thrust: { x: 0, y: 0 },
             explodeTime: 0, blinkTime: 0, blinkOn: true,
             invTime: Math.ceil(CONFIG.INV_DUR * CONFIG.FPS),
             lasers: [], particles: []
@@ -44,7 +43,7 @@ class GameModel {
             do {
                 x = Math.floor(Math.random() * canvas.width);
                 y = Math.floor(Math.random() * canvas.height);
-            } while (this.ship && this.distBetweenPoints(this.ship.x, this.ship.y, x, y) < CONFIG.ROIDS_SIZE * 2 + this.ship.r);
+            } while (this.ship && this.dist(this.ship.x, this.ship.y, x, y) < CONFIG.ROIDS_SIZE * 2 + this.ship.r);
             this.asteroids.push(this.newAsteroid(x, y, Math.ceil(CONFIG.ROIDS_SIZE / 2)));
         }
     }
@@ -55,13 +54,17 @@ class GameModel {
             x, y, r, vert,
             xv: Math.random() * CONFIG.ROIDS_SPD / CONFIG.FPS * (Math.random() < 0.5 ? 1 : -1),
             yv: Math.random() * CONFIG.ROIDS_SPD / CONFIG.FPS * (Math.random() < 0.5 ? 1 : -1),
-            a: Math.random() * Math.PI * 2, offs: []
+            a: Math.random() * 6, offs: []
         };
         for (let i = 0; i < vert; i++) roid.offs.push(Math.random() * CONFIG.ROIDS_JAG * 2 + 1 - CONFIG.ROIDS_JAG);
         return roid;
     }
 
-    distBetweenPoints(x1, y1, x2, y2) { return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)); }
+    dist(x1, y1, x2, y2) { 
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        return Math.sqrt(dx * dx + dy * dy); 
+    }
 
     handleScreenWrap(obj) {
         if (obj.x < 0 - obj.r) obj.x = canvas.width + obj.r;
@@ -92,7 +95,7 @@ class GameModel {
 
         const exploding = this.ship.explodeTime > 0;
 
-        // Físicas de la Nave y Partículas
+        // Nave
         if (!exploding) {
             if (this.ship.invTime > 0) {
                 this.ship.invTime--;
@@ -123,7 +126,7 @@ class GameModel {
             }
         }
 
-        // Láseres
+        // Laseres
         for (let i = this.ship.lasers.length - 1; i >= 0; i--) {
             let l = this.ship.lasers[i];
             l.x += l.xv; l.y += l.yv;
@@ -138,7 +141,7 @@ class GameModel {
         // Colisiones
         if (!exploding && this.ship.invTime === 0) {
             for (let i = 0; i < this.asteroids.length; i++) {
-                if (this.distBetweenPoints(this.ship.x, this.ship.y, this.asteroids[i].x, this.asteroids[i].y) < this.ship.r + this.asteroids[i].r) {
+                if (this.dist(this.ship.x, this.ship.y, this.asteroids[i].x, this.asteroids[i].y) < this.ship.r + this.asteroids[i].r) {
                     this.ship.explodeTime = Math.ceil(CONFIG.EXPLODE_DUR * CONFIG.FPS);
                     for(let k = 0; k < 30; k++) {
                         this.ship.particles.push({
@@ -148,7 +151,7 @@ class GameModel {
                             r: Math.random() * 3
                         });
                     }
-                    this.destroyAsteroid(i);
+                    this.killAsteroid(i);
                     break;
                 }
             }
@@ -156,18 +159,18 @@ class GameModel {
 
         for (let i = this.asteroids.length - 1; i >= 0; i--) {
             for (let j = this.ship.lasers.length - 1; j >= 0; j--) {
-                if (this.distBetweenPoints(this.asteroids[i].x, this.asteroids[i].y, this.ship.lasers[j].x, this.ship.lasers[j].y) < this.asteroids[i].r) {
+                if (this.dist(this.asteroids[i].x, this.asteroids[i].y, this.ship.lasers[j].x, this.ship.lasers[j].y) < this.asteroids[i].r) {
                     let r = this.asteroids[i].r;
                     this.score += r >= CONFIG.ROIDS_SIZE / 2 ? CONFIG.PTS_LGE : r >= CONFIG.ROIDS_SIZE / 4 ? CONFIG.PTS_MED : CONFIG.PTS_SML;
                     this.ship.lasers.splice(j, 1);
-                    this.destroyAsteroid(i);
+                    this.killAsteroid(i);
                     break;
                 }
             }
         }
     }
 
-    destroyAsteroid(index) {
+    killAsteroid(index) {
         const { x, y, r } = this.asteroids[index];
         if (r > Math.ceil(CONFIG.ROIDS_SIZE / 8)) {
             this.asteroids.push(this.newAsteroid(x, y, Math.ceil(r / 2)));
@@ -178,7 +181,7 @@ class GameModel {
     }
 }
 
-// 2. VISTA (Renderizado Gráfico)
+// LA VISTA
 class GameView {
     constructor(ctx, canvas) {
         this.ctx = ctx;
@@ -215,7 +218,7 @@ class GameView {
     drawMenu() {
         this.ctx.fillStyle = "white"; this.ctx.textAlign = "center";
         this.ctx.font = "80px Courier"; this.ctx.fillText("ASTEROIDS", this.canvas.width / 2, this.canvas.height / 2 - 20);
-        this.ctx.font = "20px Courier"; this.ctx.fillText("PRESS SPACE TO PLAY", this.canvas.width / 2, this.canvas.height / 2 + 40);
+        this.ctx.font = "20px Courier"; this.ctx.fillText("PRESIONA ESPACIO PARA JUGAR", this.canvas.width / 2, this.canvas.height / 2 + 40);
     }
 
     drawShip(ship, gameOver) {
@@ -247,24 +250,24 @@ class GameView {
         this.ctx.textAlign = "left"; 
         this.ctx.fillText("LEVEL: " + (level + 1), 20, this.canvas.height - 20);
 
-        // 3. Dibujar las Vidas
+        // Dibujar las Vidas
         for (let i = 0; i < lives; i++) {
             let x = 30 + i * 35;
             this.ctx.strokeStyle = "white"; this.ctx.beginPath();
             this.ctx.moveTo(x, 30); this.ctx.lineTo(x-10, 50); this.ctx.lineTo(x+10, 50); this.ctx.closePath(); this.ctx.stroke();
         }
 
-        // 4. Dibujar Game Over
+        // Dibujar Game Over
         if (gameOver) {
             this.ctx.textAlign = "center"; this.ctx.font = "60px Courier";
             this.ctx.fillText("GAME OVER", this.canvas.width / 2, this.canvas.height / 2);
             this.ctx.font = "20px Courier";
-            this.ctx.fillText("PRESIONA ENTER PARA REINICIAR", this.canvas.width / 2, this.canvas.height / 2 + 50);
+            this.ctx.fillText("PRECIONA ENTER PARA REINICIAR", this.canvas.width / 2, this.canvas.height / 2 + 50);
         }
     }
 }
 
-// 3. CONTROLADOR (Gestión de Inputs y Bucle)
+// CONTROLADOR
 class GameController {
     constructor(model, view) {
         this.model = model;
@@ -315,6 +318,5 @@ class GameController {
     }
 }
 
-// ARRANQUE DE LA APLICACIÓN
 const app = new GameController(new GameModel(), new GameView(ctx, canvas));
 app.start();
